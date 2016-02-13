@@ -18,4 +18,4 @@ Prime is built with clean and modular **Abstract Data Type** programming style a
 This library makes a good base for non-trivial projects like renderers, game engines, and other real-ass shit that absolutely *needs* to be built with good programming semantics.
 
 ## Needs More Cowbell
-This project has reached alpha-status, but is rather lacking in tests, having its correctness proven only by its heavy use in the pure functional game engine Nu -  https://github.com/bryanedds/NuGameEngine. More tests are coming along over time, however :)
+This project has reached alpha-status, but is rather lacking in docs and tests, having its correctness proven only by its heavy use in the pure functional game engine Nu -  https://github.com/bryanedds/NuGameEngine. More docs and tests are coming along, however :)
