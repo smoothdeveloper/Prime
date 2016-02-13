@@ -4,7 +4,7 @@ The Prime F# Code Library [![License](https://img.shields.io/badge/license-MIT-b
 ## Features
 
 - A serialization system based on symbolic expressions with the **Symbol** and related types.
-- A purely functional, publisher-neutral event system with **EventSystem** and related.
+- A purely functional, publisher-neutral events with **EventSystem** and related types.
 - The functional-reactive arrow and monad **Observation** and **Chain** built upon said event system.
 - A purely functional, dynamic property system called **Xtension**.
 - A purely functional random number generator called **Rand**.
