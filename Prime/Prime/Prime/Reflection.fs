@@ -50,7 +50,7 @@ module Type =
         | Some ty -> ty
         | None -> failwith ^ "Could not find type with unqualified name '" + name + "'."
 
-    /// TODO: document!
+    /// Get the first property that is signalled to be preferred by the 'preference' predicate.
     let GetPropertyByPreference (preference, properties) =
         let optPreferred = Seq.tryFind preference properties
         if Seq.isEmpty properties then null
@@ -65,6 +65,7 @@ module TypeExtension =
     /// Type extension for Type.
     type Type with
 
+        /// Get the type descriptor for this type as returned by the global TypeDescriptor.
         member this.GetTypeDescriptor () =
             (TypeDescriptor.GetProvider this).GetTypeDescriptor this
 
@@ -87,6 +88,7 @@ module TypeExtension =
                 | constructor1 -> constructor1.Invoke [|this|] :?> TypeConverter |> Some
             else None
 
+        /// Get a property with the given name that can be written to, or null.
         member this.GetPropertyWritable propertyName =
             let optProperty =
                 Seq.tryFind
@@ -96,28 +98,34 @@ module TypeExtension =
             | Some property -> property
             | None -> null
 
+        /// Get all the properties with the given name.
         member this.GetProperties propertyName =
             Seq.filter
                 (fun (property : PropertyInfo) -> property.Name = propertyName)
                 (this.GetProperties ())
 
+        /// Get all the properties that can be written to.
         member this.GetPropertiesWritable () =
             Seq.filter
                 (fun (property : PropertyInfo) -> property.CanWrite)
                 (this.GetProperties ())
 
+        /// Get all the properties with the give name that can be written to.
         member this.GetPropertiesWritable propertyName =
             Seq.filter
                 (fun (property : PropertyInfo) -> property.Name = propertyName && property.CanWrite)
                 (this.GetProperties ())
 
+        /// Get the first property with the given name that is signalled to be preferred by the 'preference' predicate.
         member this.GetPropertyByPreference (preference, propertyName) =
             let properties = this.GetProperties propertyName
             Type.GetPropertyByPreference (preference, properties)
 
+        /// Get the property with the given name, preferring the variant that can be written to, or null if none found.
         member this.GetPropertyPreferWritable propertyName =
             this.GetPropertyByPreference ((fun (property : PropertyInfo) -> property.CanWrite), propertyName)
 
+        /// Get all the properties that are signalled to be preferred by the 'preference' predicate.
         member this.GetPropertiesByPreference preference =
             let propertiesGrouped =
                 Seq.groupBy
@@ -129,5 +137,6 @@ module TypeExtension =
                     propertiesGrouped
             Seq.filter (fun optProperty -> optProperty <> null) optProperties
 
+        /// Get all the properties, preferring those that can be written to if there is a name clash.
         member this.GetPropertiesPreferWritable () =
             this.GetPropertiesByPreference (fun (property : PropertyInfo) -> property.CanWrite)
