@@ -63,8 +63,6 @@
     <Compile Include="Operators.fs" />
     <Compile Include="Sectioning.fs" />
     <Compile Include="Log.fs" />
-    <Compile Include="Id.fs" />
-    <Compile Include="RQueue.fs" />
     <Compile Include="Option.fs" />
     <Compile Include="Pair.fs" />
     <Compile Include="Triple.fs" />

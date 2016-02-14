@@ -114,7 +114,7 @@ module Eventable =
         else failwith "Event name cannot be empty."
 
     let getSortableSubscriptions
-        (getEntityPublishingPriority : Participant -> 'w -> single) (subscriptions : SubscriptionEntry rQueue) (world : 'w) :
+        (getEntityPublishingPriority : Participant -> 'w -> single) (subscriptions : SubscriptionEntry list) (world : 'w) :
         (single * SubscriptionEntry) list =
         List.foldBack
             (fun (key, participant : Participant, subscription) subscriptions ->

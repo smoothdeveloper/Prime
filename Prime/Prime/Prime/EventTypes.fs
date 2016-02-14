@@ -58,7 +58,7 @@ and SubscriptionEntry =
 
 /// Abstracts over a subscription sorting procedure.
 and SubscriptionSorter<'w when 'w :> 'w Eventable> =
-    SubscriptionEntry rQueue -> 'w -> SubscriptionEntry rQueue
+    SubscriptionEntry list -> 'w -> SubscriptionEntry list
 
 /// Describes an event subscription that can be boxed / unboxed.
 and internal BoxableSubscription<'w when 'w :> 'w Eventable> =
@@ -66,7 +66,7 @@ and internal BoxableSubscription<'w when 'w :> 'w Eventable> =
 
 /// A map of event subscriptions.
 and internal SubscriptionEntries =
-    Vmap<obj Address, SubscriptionEntry rQueue>
+    Vmap<obj Address, SubscriptionEntry list>
 
 /// A map of subscription keys to unsubscription data.
 and internal UnsubscriptionEntries =
