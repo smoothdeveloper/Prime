@@ -5,7 +5,7 @@ The Prime F# Code Library [![License](https://img.shields.io/badge/license-MIT-b
 
 - A serialization system based on symbolic expressions with **SymbolicConverter** and related types.
 - A purely functional, publisher-neutral event system with **EventSystem** and related types.
-- The functional-reactive arrow and monad **Observation** and **Chain** built upon said event system.
+- The functional-reactive **Observation** arrow and **Chain** monad for said event system.
 - A purely functional, dynamic property system called **Xtension**.
 - A purely functional random number generator called **Rand**.
 - The incredibly valuable **Vsync** monad allowing the same program to be run in parallel or debugged sequentially.
