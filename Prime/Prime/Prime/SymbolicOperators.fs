@@ -6,7 +6,7 @@ open System
 open Prime
 
 [<AutoOpen>]
-module SymbolicStringModule =
+module SymbolicOperators =
 
     /// Uses an algebraic converter to convert a value to a string.
     let symstring (value : obj) =

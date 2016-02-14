@@ -6,7 +6,8 @@ open System
 
 /// An immutable random number generator using the xorshift* algorithm.
 type [<StructuralEquality; NoComparison>] Rand =
-    { RandState : uint64 }
+    private
+        { RandState : uint64 }
 
 [<RequireQualifiedAccess; CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
 module Rand =

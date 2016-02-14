@@ -55,6 +55,9 @@ module Operators =
     /// Test for non-null.
     let inline isNotNull x = not (isNull x)
 
+    /// Convert a nullable value into an option.
+    let inline denull x = match x with null -> None | _ -> Some x
+
     /// Test for string equality.
     let inline strEq str str2 = String.Equals (str, str2, StringComparison.Ordinal)
 

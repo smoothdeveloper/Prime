@@ -29,6 +29,7 @@ type XFields = Vmap<string, XField>
 /// Xtensions (and their supporting types) are a dynamic, functional, and semi-convenient way
 /// to implement dynamic fields.
 /// TODO: use DebuggerTypeProxyAttribute to make xFields easier to browse in the debugger.
+/// TODO: make this an abstract data type.
 type [<NoEquality; NoComparison>] Xtension =
     { XFields : XFields
       CanDefault : bool
