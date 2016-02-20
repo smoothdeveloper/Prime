@@ -57,29 +57,29 @@ type SymbolicConverter (targetType : Type) =
                 let kvp = objToKeyValuePair source
                 let keySymbol = toSymbol gargs.[0] kvp.Key
                 let valueSymbol = toSymbol gargs.[1] kvp.Value
-                Molecule [keySymbol; valueSymbol]
+                Symbols [keySymbol; valueSymbol]
             elif sourceType.Name = typedefof<_ list>.Name then
                 let gargs = sourceType.GetGenericArguments ()
                 let items = objToObjList source
                 let symbols = List.map (toSymbol gargs.[0]) items
-                Molecule symbols
+                Symbols symbols
             elif sourceType.Name = typedefof<_ Set>.Name then
                 let gargs = sourceType.GetGenericArguments ()
                 let items = objToComparableSet source |> List.ofSeq
                 let symbols = List.map (toSymbol gargs.[0]) items
-                Molecule symbols
+                Symbols symbols
             elif sourceType.Name = typedefof<Map<_, _>>.Name then
                 let gargs = sourceType.GetGenericArguments ()
                 let itemType = typedefof<KeyValuePair<_, _>>.MakeGenericType [|gargs.[0]; gargs.[1]|]
                 let items = objToObjList source
                 let symbols = List.map (toSymbol itemType) items
-                Molecule symbols
+                Symbols symbols
             elif sourceType.Name = typedefof<Vmap<_, _>>.Name then
                 let gargs = sourceType.GetGenericArguments ()
                 let itemType = typedefof<Tuple<_, _>>.MakeGenericType [|gargs.[0]; gargs.[1]|]
                 let items = objToObjList source
                 let symbols = List.map (toSymbol itemType) items
-                Molecule symbols
+                Symbols symbols
             elif sourceType.Name = typedefof<SymbolicCompression<_, _>>.Name then
                 let (unionCase, unionFields) = FSharpValue.GetUnionFields (source, sourceType)
                 let value = unionFields.[0]
@@ -94,19 +94,19 @@ type SymbolicConverter (targetType : Type) =
                 let tupleFields = FSharpValue.GetTupleFields source
                 let tupleElementTypes = FSharpType.GetTupleElements sourceType
                 let tupleFieldSymbols = List.mapi (fun i tupleField -> toSymbol tupleElementTypes.[i] tupleField) (List.ofArray tupleFields)
-                Molecule tupleFieldSymbols
+                Symbols tupleFieldSymbols
             elif FSharpType.IsRecord sourceType then
                 let recordFields = FSharpValue.GetRecordFields source
                 let recordFieldTypes = FSharpType.GetRecordFields sourceType
                 let recordFieldSymbols = List.mapi (fun i recordField -> toSymbol recordFieldTypes.[i].PropertyType recordField) (List.ofArray recordFields)
-                Molecule recordFieldSymbols
+                Symbols recordFieldSymbols
             elif FSharpType.IsUnion sourceType then
                 let (unionCase, unionFields) = FSharpValue.GetUnionFields (source, sourceType)
                 let unionFieldTypes = unionCase.GetFields ()
                 if not ^ Array.isEmpty unionFields then
                     let unionFieldSymbols = List.mapi (fun i unionField -> toSymbol unionFieldTypes.[i].PropertyType unionField) (List.ofArray unionFields)
                     let unionSymbols = Atom unionCase.Name :: unionFieldSymbols
-                    Molecule unionSymbols
+                    Symbols unionSymbols
                 else Atom unionCase.Name
             else
                 let typeConverter = TypeDescriptor.GetConverter sourceType
@@ -123,12 +123,12 @@ type SymbolicConverter (targetType : Type) =
             match symbol with
             | Atom str -> (TypeDescriptor.GetConverter destType).ConvertFromString str
             | Quote _ -> failwith "Expected Symbol.Atom for conversion to string."
-            | Molecule _ -> failwith "Expected Symbol.Atom for conversion to string."
+            | Symbols _ -> failwith "Expected Symbol.Atom for conversion to string."
         elif destType = typeof<string> then
             match symbol with
             | Atom str -> str :> obj
             | Quote _ -> failwith "Expected Symbol.Atom for conversion to string."
-            | Molecule _ -> failwith "Expected Symbol.Atom for conversion to string."
+            | Symbols _ -> failwith "Expected Symbol.Atom for conversion to string."
         elif destType = typeof<Symbol> then
             // nothing to do when we want a symbol and already have it
             symbol :> obj
@@ -141,7 +141,7 @@ type SymbolicConverter (targetType : Type) =
             | None ->
                 if destType.Name = typedefof<_ list>.Name then
                     match symbol with
-                    | Molecule symbols ->
+                    | Symbols symbols ->
                         let gargs = destType.GetGenericArguments ()
                         let elementType = gargs.[0]
                         let elements = List.map (fromSymbol elementType) symbols
@@ -151,7 +151,7 @@ type SymbolicConverter (targetType : Type) =
                     | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
                 elif destType.Name = typedefof<_ Set>.Name then
                     match symbol with
-                    | Molecule symbols ->
+                    | Symbols symbols ->
                         let gargs = destType.GetGenericArguments ()
                         let elementType = gargs.[0]
                         let elements = List.map (fromSymbol elementType) symbols
@@ -161,7 +161,7 @@ type SymbolicConverter (targetType : Type) =
                     | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
                 elif destType.Name = typedefof<Map<_, _>>.Name then
                     match symbol with
-                    | Molecule symbols ->
+                    | Symbols symbols ->
                         let gargs = destType.GetGenericArguments ()
                         match gargs with
                         | [|fstType; sndType|] ->
@@ -174,7 +174,7 @@ type SymbolicConverter (targetType : Type) =
                     | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
                 elif destType.Name = typedefof<Vmap<_, _>>.Name then
                     match symbol with
-                    | Molecule symbols ->
+                    | Symbols symbols ->
                         let gargs = destType.GetGenericArguments ()
                         match gargs with
                         | [|fstType; sndType|] ->
@@ -187,7 +187,7 @@ type SymbolicConverter (targetType : Type) =
                     | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
                 elif destType.Name = typedefof<SymbolicCompression<_, _>>.Name then
                     match symbol with
-                    | Molecule symbols ->
+                    | Symbols symbols ->
                         match symbols with
                         | (Atom symbolHead) :: _ ->
                             let gargs = destType.GetGenericArguments ()
@@ -207,14 +207,14 @@ type SymbolicConverter (targetType : Type) =
                     | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
                 elif FSharpType.IsTuple destType then
                     match symbol with
-                    | Molecule symbols ->
+                    | Symbols symbols ->
                         let elementTypes = FSharpType.GetTupleElements destType
                         let elements = List.mapi (fun i elementSymbol -> fromSymbol elementTypes.[i] elementSymbol) symbols
                         FSharpValue.MakeTuple (Array.ofList elements, destType)
                     | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
                 elif FSharpType.IsRecord destType then
                     match symbol with
-                    | Molecule symbols ->
+                    | Symbols symbols ->
                         let fieldTypes = FSharpType.GetRecordFields destType
                         let fields = List.mapi (fun i fieldSymbol -> fromSymbol fieldTypes.[i].PropertyType fieldSymbol) symbols
                         FSharpValue.MakeRecord (destType, Array.ofList fields)
@@ -225,7 +225,7 @@ type SymbolicConverter (targetType : Type) =
                     | Atom unionName ->
                         let unionCase = Array.find (fun (unionCase : UnionCaseInfo) -> unionCase.Name = unionName) unionCases
                         FSharpValue.MakeUnion (unionCase, [||])
-                    | Molecule symbols ->
+                    | Symbols symbols ->
                         match symbols with
                         | (Atom symbolHead) :: symbolTail ->
                             let unionName = symbolHead
@@ -259,7 +259,7 @@ type SymbolicConverter (targetType : Type) =
                 toString sourceType source :> obj
         elif destType = typeof<Symbol> then
             match source with
-            | null -> Molecule [] :> obj
+            | null -> Symbols [] :> obj
             | _ -> toSymbol destType source :> obj
         else
             let sourceType = source.GetType ()

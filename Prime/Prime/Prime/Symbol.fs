@@ -11,7 +11,7 @@ open Prime
 type Symbol =
     | Atom of string
     | Quote of string
-    | Molecule of Symbol list
+    | Symbols of Symbol list
 
 [<RequireQualifiedAccess; CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
 module Symbol =
@@ -20,10 +20,10 @@ module Symbol =
     let [<Literal>] WhitespaceChars = " \t" + NewlineChars
     let [<Literal>] SeparatorChar = ' '
     let [<Literal>] SeparatorStr = " "
-    let [<Literal>] OpenMoleculeChar = '['
-    let [<Literal>] OpenMoleculeStr = "["
-    let [<Literal>] CloseMoleculeChar = ']'
-    let [<Literal>] CloseMoleculeStr = "]"
+    let [<Literal>] OpenSymbolsChar = '['
+    let [<Literal>] OpenSymbolsStr = "["
+    let [<Literal>] CloseSymbolsChar = ']'
+    let [<Literal>] CloseSymbolsStr = "]"
     let [<Literal>] OpenStringChar = '\"'
     let [<Literal>] OpenStringStr = "\""
     let [<Literal>] CloseStringChar = '\"'
@@ -38,8 +38,8 @@ module Symbol =
     let skipWhitespaces = skipMany skipWhitespace
 
     let charForm character = skipChar character >>. skipWhitespaces
-    let openMoleculeForm = charForm OpenMoleculeChar
-    let closeMoleculeForm = charForm CloseMoleculeChar
+    let openSymbolsForm = charForm OpenSymbolsChar
+    let closeSymbolsForm = charForm CloseSymbolsChar
     let openStringForm = skipChar OpenStringChar
     let closeStringForm = charForm CloseStringChar
     let openQuoteForm = charForm OpenQuoteChar
@@ -77,24 +77,24 @@ module Symbol =
             do! closeQuoteForm
             return quoteChars |> String.implode |> Quote }
 
-    let readMolecule =
+    let readSymbols =
         parse {
-            do! openMoleculeForm
+            do! openSymbolsForm
             let! values = many readSymbol
-            do! closeMoleculeForm
-            return values |> Molecule }
+            do! closeSymbolsForm
+            return values |> Symbols }
 
     do refReadSymbol :=
         attempt readAtomAsString <|>
         attempt readQuote <|>
         attempt readAtom <|>
-        readMolecule
+        readSymbols
 
     let rec writeSymbol symbol =
         match symbol with
         | Atom str -> str
         | Quote str -> OpenQuoteStr + str + CloseQuoteStr
-        | Molecule symbols -> OpenMoleculeStr + String.Join (" ", List.map writeSymbol symbols) + CloseMoleculeStr
+        | Symbols symbols -> OpenSymbolsStr + String.Join (" ", List.map writeSymbol symbols) + CloseSymbolsStr
 
     /// Convert a string to a symbol, with the following parses:
     /// 
@@ -108,7 +108,7 @@ module Symbol =
     /// "String with quoted spaces."
     /// String_with_underscores_for_spaces.
     /// 
-    /// (* Molecule values *)
+    /// (* Symbols values *)
     ///
     /// []
     /// [Some 0]
@@ -135,7 +135,7 @@ module Symbol =
     /// "String with quoted spaces."
     /// String_with_underscores_for_spaces.
     /// 
-    /// (* Molecule values *)
+    /// (* Symbols values *)
     ///
     /// []
     /// [Some 0]

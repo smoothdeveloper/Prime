@@ -9,7 +9,7 @@ open Prime
 // TODO: see if this can be got rid of by having an alternatve way to write symbols directly.
 type SymbolIndex =
     | AtomIndex of int64 * SymbolIndex list
-    | MoleculeIndex of int64 * SymbolIndex list
+    | SymbolsIndex of int64 * SymbolIndex list
 
 [<RequireQualifiedAccess; CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
 module SymbolIndex =
@@ -24,16 +24,16 @@ module SymbolIndex =
             let! symbolIndices = many readSymbolIndex
             return AtomIndex (openPosition.Index, symbolIndices) }
 
-    let readMoleculeIndex =
+    let readSymbolsIndex =
         parse {
             let! openPosition = getPosition
-            do! Symbol.openMoleculeForm
+            do! Symbol.openSymbolsForm
             let! symbolIndices = many readSymbolIndex
-            do! Symbol.closeMoleculeForm
-            return MoleculeIndex (openPosition.Index, symbolIndices) }
+            do! Symbol.closeSymbolsForm
+            return SymbolsIndex (openPosition.Index, symbolIndices) }
 
     do refReadSymbolIndex :=
-        attempt readMoleculeIndex <|>
+        attempt readSymbolsIndex <|>
         readAtomIndex
 
     /// Attempt to a symbol index from a string.
@@ -52,7 +52,7 @@ module SymbolIndex =
             match symbolIndex with
             | AtomIndex (_, symbolIndices) ->
                 List.iteri (advance true tabDepth) symbolIndices
-            | MoleculeIndex (index, symbolIndices) ->
+            | SymbolsIndex (index, symbolIndices) ->
                 if index <> 0L && (hasContentParent || childIndex <> 0) then
                     let whitespace = "\n" + String.replicate tabDepth " "
                     ignore ^ builder.Insert (int index + builderIndex, whitespace)
