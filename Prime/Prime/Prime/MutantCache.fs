@@ -16,7 +16,6 @@ type [<ReferenceEquality>] 'm MutantCache =
 module MutantCache =
 
     let mutable private GlobalMutantRebuilds = 0L
-    let getGlobalMutantRebuilds () = GlobalMutantRebuilds
 
     let private rebuildCache (rebuildMutant : unit -> 'm) (mutantCache : 'm MutantCache)=
 #if DEBUG
@@ -31,6 +30,10 @@ module MutantCache =
         match mutantCache.OptValidMutant with
         | Some mutant -> (mutant, mutantCache)
         | None -> rebuildCache rebuildMutant mutantCache
+
+    /// The number of mutant rebuilds that have occured when using this type.
+    /// Useful for performance trouble-shooting in Debug mode.
+    let getGlobalMutantRebuilds () = GlobalMutantRebuilds
 
     let getMutant rebuildMutant (mutantCache : 'm MutantCache) =
         let (mutantUncloned, mutantCache) = getMutantUncloned rebuildMutant mutantCache

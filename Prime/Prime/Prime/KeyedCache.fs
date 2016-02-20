@@ -4,7 +4,7 @@
 namespace Prime
 open Prime
 
-/// Presents a purely-functional interface to a cached mutable value.
+/// Presents a purely-functional interface to a cached value.
 /// Works by associating a cached value with a given cache key such that the cached value remains valid when queried
 /// for using the same cache key (as decided by a simple key comparer function), automatically rebuilding the cached
 /// value and key (as done with a simple factory function).
@@ -19,10 +19,12 @@ module KeyedCache =
     let mutable private GlobalCacheHits = 0L
     let mutable private GlobalCacheMisses = 0L
 
-    /// The number of cache hits that have occured when using this type. Useful for performance tracking.
+    /// The number of cache hits that have occured when using this type.
+    /// Useful for performance trouble-shooting in Debug mode.
     let getGlobalCacheHits () = GlobalCacheHits
 
-    /// The number of cache misses that have occured when using this type. Useful for performance tracking.
+    /// The number of cache misses that have occured when using this type.
+    /// Useful for performance trouble-shooting in Debug mode.
     let getGlobalCacheMisses () = GlobalCacheMisses
 
     /// <summary>Get the cached value.</summary>
