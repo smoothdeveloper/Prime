@@ -23,17 +23,17 @@ type [<StructuralEquality; NoComparison>] XField =
     { FieldValue : obj
       FieldType : Type }
 
-/// An indexible collection of XFields.
+/// A map of XFields.
 type XFields = Vmap<string, XField>
 
 /// Xtensions (and their supporting types) are a dynamic, functional, and semi-convenient way
 /// to implement dynamic fields.
-/// TODO: use DebuggerTypeProxyAttribute to make xFields easier to browse in the debugger.
-/// TODO: make this an abstract data type.
+/// TODO: use DebuggerTypeProxyAttribute to make XFields easier to browse in the debugger.
 type [<NoEquality; NoComparison>] Xtension =
-    { XFields : XFields
-      CanDefault : bool
-      Sealed : bool }
+    private
+        { Fields : XFields
+          CanDefault : bool
+          Sealed : bool }
 
     /// Get the default value of an instance of type 'r taking into account XDefaultValue decorations.
     static member private getDefaultValue () : 'r =
@@ -62,7 +62,7 @@ type [<NoEquality; NoComparison>] Xtension =
     static member (?) (xtension, memberName) : 'r =
 
         // check if dynamic member is an existing field
-        match Vmap.tryFind memberName xtension.XFields with
+        match Vmap.tryFind memberName xtension.Fields with
         | Some field ->
             
             // return field directly if the return type matches, otherwise the default value for that type
@@ -79,30 +79,31 @@ type [<NoEquality; NoComparison>] Xtension =
     /// Example:
     ///     let entity = entity.Position <- Vector2 (4.0, 5.0).
     static member (?<-) (xtension, fieldName, value : 'a) =
-#if DEBUG
-        // NOTE: nop'ed outside of debug mode for efficiency
         // TODO: consider writing a 'Map.addDidContainKey' function to efficently add and return a
         // result that the key was already contained.
-        if xtension.Sealed && not ^ Vmap.containsKey fieldName xtension.XFields
+        if xtension.Sealed && not ^ Vmap.containsKey fieldName xtension.Fields
         then failwith "Cannot add field to a sealed Xtension."
         else
-#endif
-            let xFields = Vmap.add fieldName { FieldValue = value :> obj; FieldType = typeof<'a> } xtension.XFields
-            { xtension with XFields = xFields }
+            let fields = Vmap.add fieldName { FieldValue = value :> obj; FieldType = typeof<'a> } xtension.Fields
+            { xtension with Fields = fields }
 
 [<RequireQualifiedAccess; CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
 module Xtension =
 
-    let [<Literal>] private FieldMapDepth = 3
+    /// Make an extension with custom safety.
+    let make fields canDefault isSealed = { Fields = fields; CanDefault = canDefault; Sealed = isSealed }
 
     /// An Xtension that can default and isn't sealed.
-    let empty = { XFields = Vmap.makeEmpty (); CanDefault = true; Sealed = false }
+    let empty = make (Vmap.makeEmpty ()) true false
 
     /// An Xtension that cannot default and is sealed.
-    let safe = { XFields = Vmap.makeEmpty (); CanDefault = false; Sealed = true }
+    let safe = make (Vmap.makeEmpty ()) false true
 
     /// An Xtension that cannot default and isn't sealed.
-    let mixed = { XFields = Vmap.makeEmpty (); CanDefault = false; Sealed = false }
+    let mixed = make (Vmap.makeEmpty ()) false false
 
-    /// Make an extension with custom safety.
-    let make canDefault isSealed = { XFields = Vmap.makeEmpty (); CanDefault = canDefault; Sealed = isSealed }
+    /// Get an Xtension's fields.
+    let getFields xtension = xtension.Fields
+
+    /// Set an Xtension's fields.
+    let setFields fields xtension = { xtension with Fields = fields }
