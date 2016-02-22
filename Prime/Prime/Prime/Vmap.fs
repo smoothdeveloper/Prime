@@ -187,6 +187,9 @@ module Vmap =
         let h = k.GetHashCode ()
         { map with Node = Vnode.remove h k 0 map.Node }
 
+    let removeMany keys map =
+        Seq.fold (fun map (k : 'k) -> remove k map) map keys
+
     let tryFind (k : 'k) map : 'v option =
         let h = k.GetHashCode ()
         Vnode.tryFind h k 0 map.Node

@@ -102,8 +102,20 @@ module Xtension =
     /// An Xtension that cannot default and isn't sealed.
     let mixed = make (Vmap.makeEmpty ()) false false
 
+    /// Get a field from an xtension.
+    let getField name xtension = Vmap.find name xtension.Fields
+
     /// Get an Xtension's fields.
     let getFields xtension = xtension.Fields
 
-    /// Set an Xtension's fields.
-    let setFields fields xtension = { xtension with Fields = fields }
+    /// Attach a field to an Xtension.
+    let attachField name field xtension = { xtension with Fields = Vmap.add name field xtension.Fields }
+
+    /// Attach multiple fields to an Xtension.
+    let attachFields namesAndFields xtension = { xtension with Fields = Vmap.addMany namesAndFields xtension.Fields }
+
+    /// Detach a field from an Xtension.
+    let detachField name xtension = { xtension with Fields = Vmap.remove name xtension.Fields }
+
+    /// Detach multiple fields from an Xtension.
+    let detachFields names xtension = { xtension with Fields = Vmap.removeMany names xtension.Fields }
