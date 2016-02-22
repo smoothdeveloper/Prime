@@ -20,6 +20,7 @@ module Program =
             let watch = Stopwatch.StartNew ()
             let made = make entries
             watch.Stop ()
+            GC.Collect ()
             let watch2 = Stopwatch.StartNew ()
             lookup entries made
             watch2.Stop ()
