@@ -8,8 +8,7 @@ open System.Diagnostics
 [<RequireQualifiedAccess>]
 module Log =
 
-    let mutable private initialized =
-        false
+    let mutable private Initialized = false
 
     let private getUtcNowStr () =
         let now = DateTime.UtcNow
@@ -47,7 +46,7 @@ module Log =
     let init (optFileName : string option) =
 
         // init only once
-        if not initialized then
+        if not Initialized then
 
             // add listeners
             let listeners =
@@ -65,5 +64,5 @@ module Log =
             Debug.AutoFlush <- true
             Trace.AutoFlush <- true
 
-            // mark as initialized
-            initialized <- true
+            // mark as Initialized
+            Initialized <- true

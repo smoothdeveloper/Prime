@@ -8,12 +8,22 @@ open Prime
 [<AutoOpen>]
 module SymbolicOperators =
 
-    /// Uses an algebraic converter to convert a value to a string.
-    let symstring (value : obj) =
-        let converter = SymbolicConverter (value.GetType ())
+    /// Convert a value to a symbol.
+    let symbolize<'a> (value : 'a) =
+        let converter = SymbolicConverter ^ getType value
+        converter.ConvertTo (value, typeof<Symbol>) :?> Symbol
+
+    /// Convert a symbol to a value.
+    let valuate<'a> (symbol : Symbol) =
+        let converter = SymbolicConverter typeof<'a>
+        converter.ConvertFrom symbol :?> 'a
+
+    /// Uses a symbolic converter to convert a value to a string.
+    let symstring<'a> (value : 'a) =
+        let converter = SymbolicConverter ^ getType value
         converter.ConvertToString value
 
-    /// Uses an algebraic converter to convert a string to a value.
+    /// Uses a symbolic converter to convert a string to a value.
     let symvalue<'a> (str : string) =
         let converter = SymbolicConverter typeof<'a>
         converter.ConvertFromString str :?> 'a
