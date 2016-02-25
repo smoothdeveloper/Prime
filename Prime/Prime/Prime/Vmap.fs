@@ -152,8 +152,7 @@ module internal Vnode =
         Nil
 
 /// A very fast persistent hash map.
-/// TODO: document.
-/// TODO: implement filter.
+/// Works in effectively constant-time for look-ups and updates.
 type [<NoEquality; NoComparison>] Vmap<'k, 'v when 'k : comparison> =
     private
         { Node : Vnode<'k, 'v>
@@ -168,42 +167,52 @@ type [<NoEquality; NoComparison>] Vmap<'k, 'v when 'k : comparison> =
 [<RequireQualifiedAccess; CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
 module Vmap =
 
-    let isEmpty map =
-        Vnode.isEmpty map.Node
-
+    /// Create an empty Vmap.
     let makeEmpty () =
         { Node = Vnode.empty
           EmptyArray = Array.create 32 Vnode.empty }
 
+    /// Query that a Vmap is empty.
+    let isEmpty map =
+        Vnode.isEmpty map.Node
+
+    /// Add a value with the key to a Vmap.
     let add (k : 'k) (v : 'v) map =
         let hkv = Hkv (k.GetHashCode (), k, v)
         let node = Vnode.add hkv map.EmptyArray 0 map.Node
         { map with Node = node }
 
+    /// Add a list of values with associated keys to a Vmap.
     let addMany entries map =
         Seq.fold (fun map (k : 'k, v : 'v) -> add k v map) map entries
 
+    /// Remove a value with the given key from a Vmap.
     let remove (k : 'k) map =
         let h = k.GetHashCode ()
         { map with Node = Vnode.remove h k 0 map.Node }
 
+    /// Remove all values with the given keys from a Vmap.
     let removeMany keys map =
         Seq.fold (fun map (k : 'k) -> remove k map) map keys
 
+    /// Try to find a value with the given key in a Vmap.
+    /// Constant-time complexity with approx. 1/3 speed of Dictionary.TryGetValue.
     let tryFind (k : 'k) map : 'v option =
         let h = k.GetHashCode ()
         Vnode.tryFind h k 0 map.Node
-
+        
+    /// Find a value with the given key in a Vmap.
+    /// Constant-time complexity with approx. 1/3 speed of Dictionary.GetValue.
     let find (k : 'k) map : 'v =
         tryFind k map |> Option.get
 
+    /// Query that a Vmap contains a value with the given key.
     let containsKey k map =
         match tryFind k map with
         | Some _ -> true
         | None -> false
         
-    /// Combine the contents of two maps, taking an item from the second map in the case of a key
-    /// conflict.
+    /// Combine the contents of two Vmaps, taking an item from the second map in the case of a key conflict.
     let concat map map2 =
         Seq.fold (fun map (k, v) -> add k v map) map map2
 
@@ -215,6 +224,13 @@ module Vmap =
     let map mapper (map : Vmap<'k, 'v>) =
         fold
             (fun state k v -> add k (mapper v) state)
+            (makeEmpty ())
+            map
+
+    /// Filter a Vmap.
+    let filter pred (map : Vmap<'k, 'v>) =
+        fold
+            (fun state k v -> if pred k v then add k v state else state)
             (makeEmpty ())
             map
 
