@@ -17,27 +17,27 @@ module Events =
 module EventSystem =
 
     /// Add event state.
-    let addEventState key (state : 'a) eventSystem =
+    let addEventState<'a, 'w when 'w :> 'w Eventable> key (state : 'a) (eventSystem : 'w EventSystem) =
         { eventSystem with EventStates = Vmap.add key (state :> obj) eventSystem.EventStates }
 
     /// Remove event state.
-    let removeEventState key eventSystem =
+    let removeEventState<'w when 'w :> 'w Eventable> key (eventSystem : 'w EventSystem) =
         { eventSystem with EventStates = Vmap.remove key eventSystem.EventStates }
 
     /// Get subscriptions.
-    let getSubscriptions eventSystem =
+    let getSubscriptions<'w when 'w :> 'w Eventable> (eventSystem : 'w EventSystem) =
         eventSystem.Subscriptions
 
     /// Get unsubscriptions.
-    let getUnsubscriptions eventSystem =
+    let getUnsubscriptions<'w when 'w :> 'w Eventable> (eventSystem : 'w EventSystem) =
         eventSystem.Unsubscriptions
 
     /// Set subscriptions.
-    let internal setSubscriptions subscriptions eventSystem =
+    let internal setSubscriptions<'w when 'w :> 'w Eventable> subscriptions (eventSystem : 'w EventSystem) =
         { eventSystem with Subscriptions = subscriptions }
 
     /// Set unsubscriptions.
-    let internal setUnsubscriptions unsubscriptions eventSystem =
+    let internal setUnsubscriptions<'w when 'w :> 'w Eventable> unsubscriptions (eventSystem : 'w EventSystem) =
         { eventSystem with Unsubscriptions = unsubscriptions }
 
     /// Get event state.
@@ -76,11 +76,11 @@ module Eventable =
         getEventSystemBy EventSystem.getUnsubscriptions world
 
     /// Set event subscriptions.
-    let internal setSubscriptions<'w when 'w :> 'w Eventable> subscriptions (world : 'w) =
+    let private setSubscriptions<'w when 'w :> 'w Eventable> subscriptions (world : 'w) =
         world.UpdateEventSystem (EventSystem.setSubscriptions subscriptions)
 
     /// Set event unsubscriptions.
-    let internal setUnsubscriptions<'w when 'w :> 'w Eventable> unsubscriptions (world : 'w) =
+    let private setUnsubscriptions<'w when 'w :> 'w Eventable> unsubscriptions (world : 'w) =
         world.UpdateEventSystem (EventSystem.setUnsubscriptions unsubscriptions)
 
     /// Add event state to the world.
@@ -96,7 +96,7 @@ module Eventable =
         let eventSystem = getEventSystem world
         EventSystem.getEventState<'a, 'w> key eventSystem
 
-    let getAnyEventAddresses eventAddress =
+    let private getAnyEventAddresses eventAddress =
         // OPTIMIZATION: uses memoization.
         if not ^ Address.isEmpty eventAddress then
             let anyEventAddressesKey = Address.allButLast eventAddress
