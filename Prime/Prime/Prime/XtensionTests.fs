@@ -26,11 +26,9 @@ module XtensionTests =
         let fieldValue = xtn?TestField
         Assert.Equal (5, fieldValue)
 
-#if DEBUG
     let [<Fact>] cantAddFieldWhenSealed () =
         let xtn = Xtension.safe
         Assert.Throws<Exception> (fun () -> (xtn?TestField <- 0) |> ignore)
-#endif
 
     let [<Fact>] cantAccessNonexistentField () =
         let xtn = Xtension.mixed
