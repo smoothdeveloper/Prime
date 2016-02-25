@@ -53,7 +53,7 @@ module Operators =
     let inline isNull x = match x with null -> true | _ -> false
 
     /// Test for non-null.
-    let inline isNotNull x = not (isNull x)
+    let inline isNotNull x = match x with null -> false | _ -> true
 
     /// Convert a nullable value into an option.
     let inline denull x = match x with null -> None | _ -> Some x

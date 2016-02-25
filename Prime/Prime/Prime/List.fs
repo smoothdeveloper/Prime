@@ -250,6 +250,7 @@ let rec remove pred list =
 
 /// Collapse a list from the left.
 /// Example - [0, 1, 2] becomes [[]; [0]; [0; 1]; [0; 1; 2]]
+/// TODO: rename to powerList or stackLeft?
 let collapseLeft list =
     [for x in 0 .. List.length list do
         yield List.take x list]

@@ -24,6 +24,7 @@ module Either =
         | Left l -> Left l
 
     /// Builds an either monad.
+    /// TODO: fill this out more.
     type EitherBuilder () =
         member this.Bind (either, fn) = bind either fn
         member this.Return r = returnM r

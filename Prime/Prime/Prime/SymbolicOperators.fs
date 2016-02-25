@@ -14,7 +14,7 @@ module SymbolicOperators =
         converter.ConvertTo (value, typeof<Symbol>) :?> Symbol
 
     /// Convert a symbol to a value.
-    let valuate<'a> (symbol : Symbol) =
+    let valueize<'a> (symbol : Symbol) =
         let converter = SymbolicConverter typeof<'a>
         converter.ConvertFrom symbol :?> 'a
 

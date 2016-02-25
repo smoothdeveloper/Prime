@@ -33,32 +33,64 @@ module Observation =
     /// Combine an observation with the events from the given address. Combination is in 'product
     /// form', which is defined as a pair of the data of the combined events. Think of it as 'zip'
     /// for event streams.
-    /// NOTE: This function is currently broken.
-    /// TODO: fix by implementing this with event state instead of the rat's nest of subscriptions.
     let [<DebuggerHidden; DebuggerStepThrough>] product
         (eventAddress : 'b Address) (observation : Observation<'a, 'o, 'w>) : Observation<'a * 'b, 'o, 'w> =
         let subscribe = fun world ->
+        
+            // init event state, subscription keys and addresses
+            let stateKey = makeGuid ()
+            let state = (List.empty<'a>, List.empty<'b>)
+            let world = Eventable.addEventState stateKey state world
             let subscriptionKey = makeGuid ()
             let subscriptionKey' = makeGuid ()
             let subscriptionKey'' = makeGuid ()
             let (subscriptionAddress, unsubscribe, world) = observation.Subscribe world
             let subscriptionAddress' = eventAddress
             let subscriptionAddress'' = ntoa<'a * 'b> ^ Name.make ^ symstring subscriptionKey''
+            
+            // unsubscribe from 'a and 'b events, and remove event state
             let unsubscribe = fun world ->
                 let world = unsubscribe world
                 let world = Eventable.unsubscribe subscriptionKey world
-                Eventable.unsubscribe subscriptionKey' world
+                let world = Eventable.unsubscribe subscriptionKey' world
+                Eventable.removeEventState stateKey world
+
+            // subscription for 'a events
             let subscription = fun evt world ->
-                let subscription' = fun event' world ->
-                    let eventTrace = "Observation.product" :: evt.Trace
-                    let eventData = (evt.Data, event'.Data)
-                    let world = Eventable.publish6<'a * 'b, Participant, 'w> Eventable.sortSubscriptionsNone eventData subscriptionAddress'' eventTrace evt.Publisher world
-                    let world = Eventable.unsubscribe subscriptionKey' world
-                    (Cascade, world)
-                let world = Eventable.subscribe5<'b, 'o, 'w> subscriptionKey' subscription' subscriptionAddress' observation.Observer world
+                let eventTrace = "Observation.product.a" :: evt.Trace
+                let (aList : 'a list, bList : 'b list) = Eventable.getEventState stateKey world
+                let aList = evt.Data :: aList
+                let (state, world) =
+                    match (List.rev aList, List.rev bList) with
+                    | (a :: aList, b :: bList) ->
+                        let state = (aList, bList)
+                        let world = Eventable.publish6<'a * 'b, Participant, 'w> Eventable.sortSubscriptionsNone (a, b) subscriptionAddress'' eventTrace evt.Publisher world
+                        (state, world)
+                    | state -> (state, world)
+                let world = Eventable.addEventState stateKey state world
                 (Cascade, world)
+
+            // subscription for 'b events
+            let subscription' = fun evt world ->
+                let eventTrace = "Observation.product.b" :: evt.Trace
+                let (aList : 'a list, bList : 'b list) = Eventable.getEventState stateKey world
+                let bList = evt.Data :: bList
+                let (state, world) =
+                    match (List.rev aList, List.rev bList) with
+                    | (a :: aList, b :: bList) ->
+                        let state = (aList, bList)
+                        let world = Eventable.publish6<'a * 'b, Participant, 'w> Eventable.sortSubscriptionsNone (a, b) subscriptionAddress'' eventTrace evt.Publisher world
+                        (state, world)
+                    | state -> (state, world)
+                let world = Eventable.addEventState stateKey state world
+                (Cascade, world)
+
+            // subscripe 'a and 'b events
             let world = Eventable.subscribe5<'a, 'o, 'w> subscriptionKey subscription subscriptionAddress observation.Observer world
+            let world = Eventable.subscribe5<'b, 'o, 'w> subscriptionKey subscription' subscriptionAddress' observation.Observer world
             (subscriptionAddress'', unsubscribe, world)
+
+        // fin
         { Observer = observation.Observer; Subscribe = subscribe }
 
     /// Combine an observation with the events from the given address. Combination is in 'sum
