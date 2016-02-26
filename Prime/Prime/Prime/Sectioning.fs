@@ -12,6 +12,9 @@ module Sectioning =
     /// The generic one value.
     let inline one () = LanguagePrimitives.GenericOne
 
+    /// The generic append function.
+    let inline append a b = a + b
+
     /// Generic increment.
     let inline inc n = n + one ()
 
