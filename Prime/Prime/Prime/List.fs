@@ -248,19 +248,11 @@ let rec remove pred list =
         list
         []
 
-/// Collapse a list from the left.
+/// Stack a list from the left, starting with the empty list.
 /// Example - [0, 1, 2] becomes [[]; [0]; [0; 1]; [0; 1; 2]]
-/// TODO: rename to powerList or stackLeft?
-let collapseLeft list =
+let stackLeft list =
     [for x in 0 .. List.length list do
         yield List.take x list]
-
-/// Find the duplicates in a list.
-/// TODO: speed this up with a Set internally?
-let rec duplicates z = function
-    | [] -> []
-    | x :: xs when x = z -> x :: (duplicates x xs)
-    | _ :: xs -> duplicates z xs
 
 /// Compare a list of strings lexicographically.
 let rec inline compareStrings (list : string list) (list2 : string list) =

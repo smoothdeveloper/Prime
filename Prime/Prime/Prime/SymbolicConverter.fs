@@ -137,7 +137,7 @@ type SymbolicConverter (targetType : Type) =
             | Some typeConverter ->
                 if typeConverter.CanConvertFrom typeof<Symbol>
                 then typeConverter.ConvertFrom symbol
-                else failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                else failwith ^ "Expected ability for convert from Symbol for custom type converter '" + getTypeName typeConverter + "'."
             | None ->
                 if destType.Name = typedefof<_ list>.Name then
                     match symbol with
@@ -148,7 +148,7 @@ type SymbolicConverter (targetType : Type) =
                         let cast = (typeof<System.Linq.Enumerable>.GetMethod ("Cast", BindingFlags.Static ||| BindingFlags.Public)).MakeGenericMethod [|elementType|]
                         let ofSeq = ((FSharpCoreAssembly.GetType "Microsoft.FSharp.Collections.ListModule").GetMethod ("OfSeq", BindingFlags.Static ||| BindingFlags.Public)).MakeGenericMethod [|elementType|]
                         ofSeq.Invoke (null, [|cast.Invoke (null, [|elements|])|])
-                    | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                    | _ -> failwith "Expected Symbols value for list."
                 elif destType.Name = typedefof<_ Set>.Name then
                     match symbol with
                     | Symbols symbols ->
@@ -158,7 +158,7 @@ type SymbolicConverter (targetType : Type) =
                         let cast = (typeof<System.Linq.Enumerable>.GetMethod ("Cast", BindingFlags.Static ||| BindingFlags.Public)).MakeGenericMethod [|elementType|]
                         let ofSeq = ((FSharpCoreAssembly.GetType "Microsoft.FSharp.Collections.SetModule").GetMethod ("OfSeq", BindingFlags.Static ||| BindingFlags.Public)).MakeGenericMethod [|elementType|]
                         ofSeq.Invoke (null, [|cast.Invoke (null, [|elements|])|])
-                    | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                    | _ -> failwith "Expected Symbols value for Set."
                 elif destType.Name = typedefof<Map<_, _>>.Name then
                     match symbol with
                     | Symbols symbols ->
@@ -170,8 +170,8 @@ type SymbolicConverter (targetType : Type) =
                             let cast = (typeof<System.Linq.Enumerable>.GetMethod ("Cast", BindingFlags.Static ||| BindingFlags.Public)).MakeGenericMethod [|pairType|]
                             let ofSeq = ((FSharpCoreAssembly.GetType "Microsoft.FSharp.Collections.MapModule").GetMethod ("OfSeq", BindingFlags.Static ||| BindingFlags.Public)).MakeGenericMethod [|fstType; sndType|]
                             ofSeq.Invoke (null, [|cast.Invoke (null, [|pairList|])|])
-                        | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
-                    | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                        | _ -> failwithumf ()
+                    | _ -> failwith "Expected Symbols value for Map."
                 elif destType.Name = typedefof<Vmap<_, _>>.Name then
                     match symbol with
                     | Symbols symbols ->
@@ -183,8 +183,8 @@ type SymbolicConverter (targetType : Type) =
                             let cast = (typeof<System.Linq.Enumerable>.GetMethod ("Cast", BindingFlags.Static ||| BindingFlags.Public)).MakeGenericMethod [|pairType|]
                             let ofSeq = ((typedefof<Vmap<_, _>>.Assembly.GetType "Prime.VmapModule").GetMethod ("ofSeq", BindingFlags.Static ||| BindingFlags.Public)).MakeGenericMethod [|fstType; sndType|]
                             ofSeq.Invoke (null, [|cast.Invoke (null, [|pairList|])|])
-                        | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
-                    | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                        | _ -> failwithumf ()
+                    | _ -> failwith "Expected Symbols value for Vmap."
                 elif destType.Name = typedefof<SymbolicCompression<_, _>>.Name then
                     match symbol with
                     | Symbols symbols ->
@@ -203,22 +203,22 @@ type SymbolicConverter (targetType : Type) =
                                 let b = fromSymbol bType symbol
                                 let compressionUnion = (FSharpType.GetUnionCases destType).[1]
                                 FSharpValue.MakeUnion (compressionUnion, [|b|])
-                        | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
-                    | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                        | _ -> failwith "Expected Atom value for SymbolicCompression union name."
+                    | _ -> failwith "Expected Symbols value for SymbolicCompression."
                 elif FSharpType.IsTuple destType then
                     match symbol with
                     | Symbols symbols ->
                         let elementTypes = FSharpType.GetTupleElements destType
                         let elements = List.mapi (fun i elementSymbol -> fromSymbol elementTypes.[i] elementSymbol) symbols
                         FSharpValue.MakeTuple (Array.ofList elements, destType)
-                    | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                    | _ -> failwith "Expected Symbols value for FSharp.Tuple."
                 elif FSharpType.IsRecord destType then
                     match symbol with
                     | Symbols symbols ->
                         let fieldTypes = FSharpType.GetRecordFields destType
                         let fields = List.mapi (fun i fieldSymbol -> fromSymbol fieldTypes.[i].PropertyType fieldSymbol) symbols
                         FSharpValue.MakeRecord (destType, Array.ofList fields)
-                    | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                    | _ -> failwith "Expected Symbols value for FSharp.Record."
                 elif FSharpType.IsUnion destType && destType <> typeof<string list> then
                     let unionCases = FSharpType.GetUnionCases destType
                     match symbol with
@@ -233,12 +233,12 @@ type SymbolicConverter (targetType : Type) =
                             let unionFieldTypes = unionCase.GetFields ()
                             let unionValues = List.mapi (fun i unionSymbol -> fromSymbol unionFieldTypes.[i].PropertyType unionSymbol) symbolTail
                             FSharpValue.MakeUnion (unionCase, Array.ofList unionValues)
-                        | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
-                    | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                        | _ -> failwith "Expected Atom value for FSharp.Union name."
+                    | _ -> failwith "Expected Atom or Symbols value for FSharp.Union."
                 else
                     match symbol with
                     | Atom str -> (TypeDescriptor.GetConverter destType).ConvertFromString str
-                    | _ -> failwith "Unexpected match failure in Nu.SymbolicConverter.fromSymbol. TODO: better error message!"
+                    | _ -> failwith ^ "Expected Atom value for vanilla type '" + destType.Name + "'."
 
     let fromString (destType : Type) (source : string) =
         let symbol = Symbol.fromString source
