@@ -35,17 +35,30 @@ module MutantCache =
     /// Useful for performance trouble-shooting in Debug mode.
     let getGlobalMutantRebuilds () = GlobalMutantRebuilds
 
+    /// <summary>Get the underlying mutant (mutable object / record / whatever).</summary>
+    /// <param name="rebuildMutant">A function that rebuilds the mutant from scratch in case the current underlying mutant is out of date.</param>
+    /// <param name="mutantCache">The mutant cache.</param>
     let getMutant rebuildMutant (mutantCache : 'm MutantCache) =
         let (mutantUncloned, mutantCache) = getMutantUncloned rebuildMutant mutantCache
         let mutantCloned = mutantCache.CloneMutant mutantUncloned
         (mutantCloned, mutantCache)
 
-    let mutateMutant rebuildMutant mutateMutant (mutantCache : 'm MutantCache) : 'm MutantCache =
+    /// <summary>Mutate the underlying mutant (mutable object / record / whatever).</summary>
+    /// <param name="rebuildMutant">A function that rebuilds the mutant from scratch in case the current underlying mutant is out of date.</param>
+    /// <param name="mutateMutant">A function that mutates the underlying mutant.</param>
+    /// <param name="mutantCache">The mutant cache.</param>
+    let mutateMutant rebuildMutant mutateMutant (mutantCache : 'm MutantCache) =
         let (mutant, mutantCache) = getMutantUncloned rebuildMutant mutantCache
         mutantCache.OptValidMutant <- None
         let mutant = mutateMutant mutant
         { mutantCache with OptValidMutant = Some mutant }
 
+    /// <summary>Make a mutant cache.</summary>
+    /// <param name="cloneMutant">
+    /// A function to clone the mutant before presenting it to the outside world.
+    /// Feel free to pass id if you can ensure that the presented mutant will never be mutated externally.
+    /// </param>
+    /// <param name="mutant">The mutant (mutable object / record / whatever) to be cached.</param>
     let make cloneMutant (mutant : 'm) =
         { CloneMutant = cloneMutant
           OptValidMutant = Some mutant }
