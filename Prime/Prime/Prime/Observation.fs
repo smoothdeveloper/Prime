@@ -8,7 +8,6 @@ open LanguagePrimitives
 open Prime
 
 /// An observation in the functional reactive style.
-/// TODO: I bet there's either a monad or arrow here...
 type [<ReferenceEquality>] Observation<'a, 'o, 'w when 'o :> Participant and 'w :> 'w Eventable> =
     { Observer : 'o
       Subscribe : 'w -> 'a Address * ('w -> 'w) * 'w }
@@ -33,6 +32,7 @@ module Observation =
     /// Combine an observation with the events from the given address. Combination is in 'product
     /// form', which is defined as a pair of the data of the combined events. Think of it as 'zip'
     /// for event streams.
+    /// TODO: unit test for this!
     let [<DebuggerHidden; DebuggerStepThrough>] product
         (eventAddress : 'b Address) (observation : Observation<'a, 'o, 'w>) : Observation<'a * 'b, 'o, 'w> =
         let subscribe = fun world ->
@@ -96,6 +96,7 @@ module Observation =
     /// Combine an observation with the events from the given address. Combination is in 'sum
     /// form', which is defined as an Either of the data of the combined events, where only data
     /// from the most recent event is available at a time.
+    /// TODO: unit test for this!
     let [<DebuggerHidden; DebuggerStepThrough>] sum
         (eventAddress : 'b Address) (observation : Observation<'a, 'o, 'w>) : Observation<Either<'a, 'b>, 'o, 'w> =
         let subscribe = fun world ->
