@@ -13,21 +13,35 @@ type Either<'l, 'r> =
 
 [<RequireQualifiedAccess>]
 module Either =
-
-    /// Monadic return for Either.
-    let returnM r = Right r
     
     /// Monadic bind for Either.
-    let bind either fn =
-        match either with
-        | Right r -> fn r
+    let bind a f =
+        match a with
+        | Right r -> f r
         | Left l -> Left l
 
+    /// Monadic return for Either.
+    let returnM a = Right a
+
+    /// Monadic 'return from' for Either.
+    let returnFrom a = a
+
     /// Builds an either monad.
-    /// TODO: fill this out more.
     type EitherBuilder () =
-        member this.Bind (either, fn) = bind either fn
-        member this.Return r = returnM r
+        member inline this.Bind (a, f) = bind a f
+        member inline this.Return a = returnM a
+        member inline this.ReturnFrom a = returnFrom a
+        member this.Using (d, b) = use u = d in b u
+        member this.Delay f = f ()
+        member this.Zero () = Left ()
+        member this.Yield a = Right a
+        member this.YieldFrom e = e
+        member this.Combine (a, b) =
+            match (a, b) with
+            | (Right _, Right _) -> Right (a, b)
+            | (Right _, Left _) -> Left (a, b)
+            | (Left _, Right _) -> Left (a, b)
+            | (Left _, Left _) -> Left (a, b)
 
     /// The computation expression builder for Either.
     let either = EitherBuilder ()

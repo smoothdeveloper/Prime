@@ -70,6 +70,19 @@ module Vsync =
         | Sync a -> Sync ^ fun () -> a ()
         | Async a -> Async ^ async.ReturnFrom a
 
+    /// Creates a potentially asynchronous computation that runs binder 'f' over resource 'd'.
+    /// Dispose is executed as this computation yields its result or if the asynchronous computation raises or by cancellation.
+    let [<DebuggerHidden; DebuggerStepThrough>] Using d f =
+        if isSync ()
+        then Sync ^ fun () -> use u = d in match f u with Sync b -> b () | Async _ -> failwithumf ()
+        else Async ^ async.Using (d, f >> Extract)
+
+    /// Creates a potentially asynchronous computation that runs generator 'f'.
+    let [<DebuggerHidden; DebuggerStepThrough>] Delay f =
+        if isSync ()
+        then Sync ^ fun () -> match f () with Sync a -> a () | _ -> failwithumf ()
+        else Async ^ async.Delay (f >> Extract)
+
     /// Creates a potentially asynchronous computation that just returns unit.
     let [<DebuggerHidden; DebuggerStepThrough>] Zero () =
         if isSync ()
@@ -81,12 +94,6 @@ module Vsync =
         match b with
         | Sync b' -> Sync ^ fun () -> b' ()
         | Async b' -> Async ^ async.Combine (Extract a, b')
-
-    /// Creates a potentially asynchronous computation that runs generator 'f'.
-    let [<DebuggerHidden; DebuggerStepThrough>] Delay f =
-        if isSync ()
-        then Sync ^ fun () -> match f () with Sync a -> a () | _ -> failwithumf ()
-        else Async ^ async.Delay (f >> Extract)
 
     /// Creates a potentially asynchronous computation that enumerates the sequence 's', and runs the body 'f' for each element.
     let [<DebuggerHidden; DebuggerStepThrough>] For s f =
@@ -115,13 +122,6 @@ module Vsync =
         | Sync a -> Sync ^ fun () -> try a () finally h ()
         | Async a -> Async ^ async.TryFinally (a, h)
 
-    /// Creates a potentially asynchronous computation that runs binder 'f' over resource 'd'.
-    /// Dispose is executed as this computation yields its result or if the asynchronous computation raises or by cancellation.
-    let [<DebuggerHidden; DebuggerStepThrough>] Using d f =
-        if isSync ()
-        then Sync ^ fun () -> use u = d in match f u with Sync b -> b () | Async _ -> failwithumf ()
-        else Async ^ async.Using (d, f >> Extract)
-        
     /// Creates a potentially asynchronous computation that runs the given computation and ignores its results.
     let [<DebuggerHidden; DebuggerStepThrough>] Ignore v =
         match v with
@@ -207,16 +207,16 @@ module Vsync =
 type [<Sealed>] VsyncBuilder () =
 
     member inline this.Bind (m, f) = Vsync.Bind m f
-    member inline this.Return x = Vsync.Return x
+    member inline this.Return a = Vsync.Return a
     member inline this.ReturnFrom m = Vsync.ReturnFrom m
+    member inline this.Using (d, b) = Vsync.Using d b
+    member inline this.Delay f = Vsync.Delay f
     member inline this.Zero () = Vsync.Zero ()
     member inline this.Combine (a, b) = Vsync.Combine a b
-    member inline this.Delay f = Vsync.Delay f
     member inline this.For (m, f) = Vsync.For m f
     member inline this.While (g, b) = Vsync.While g b
     member inline this.TryWith (b, h) = Vsync.TryWith b h
     member inline this.TryFinally (b, c) = Vsync.TryFinally b c
-    member inline this.Using (d, b) = Vsync.Using d b
     static member inline Ignore v = Vsync.Ignore v
     static member inline Sleep t = Vsync.Sleep t
     static member inline RunSynchronously v = Vsync.RunSynchronously v
