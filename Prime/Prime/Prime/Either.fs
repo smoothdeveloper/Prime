@@ -32,16 +32,30 @@ module Either =
         member inline this.Return a = returnM a
         member inline this.ReturnFrom a = returnFrom a
         member this.Using (d, b) = use u = d in b u
+        member this.TryWith (b, h) = try b () with exn -> h exn
+        member this.TryFinally (b, h) = try b () finally h ()
         member this.Delay f = f ()
-        member this.Zero () = Left ()
+        member this.Run f = f ()
+        member this.Zero () = Right ()
         member this.Yield a = Right a
         member this.YieldFrom e = e
-        member this.Combine (a, b) =
-            match (a, b) with
-            | (Right _, Right _) -> Right (a, b)
-            | (Right _, Left _) -> Left (a, b)
-            | (Left _, Right _) -> Left (a, b)
-            | (Left _, Left _) -> Left (a, b)
+        member this.Combine (a, b) = this.Bind (a, b)
+
+        member this.While (g, b) =
+            if g ()
+            then match b () with Right () -> this.While (g, b) | error -> error
+            else this.Zero ()
+
+        member this.For (sequence : _ seq, body) =
+            use enr = sequence.GetEnumerator ()
+            let mutable optError = None
+            while enr.MoveNext () && Option.isNone optError do
+                match body enr.Current with
+                | Right () -> ()
+                | left -> optError <- Some left
+            match optError with
+            | Some error -> error
+            | None -> this.Zero ()
 
     /// The computation expression builder for Either.
     let either = EitherBuilder ()

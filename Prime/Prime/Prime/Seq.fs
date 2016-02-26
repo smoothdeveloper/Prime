@@ -49,8 +49,8 @@ let tryTake (n : int) (seq : _ seq) =
 
 /// Project the first sequence onto the second.
 let project projector (seq_ : 'a seq) (seq2 : 'b option seq) =
-    let e = seq_.GetEnumerator ()
-    let e2 = seq2.GetEnumerator ()
+    use e = seq_.GetEnumerator ()
+    use e2 = seq2.GetEnumerator ()
     seq {
         while e.MoveNext () do
             let projection = 
@@ -65,7 +65,7 @@ let project projector (seq_ : 'a seq) (seq2 : 'b option seq) =
 let foldWhile folder (state : 's) (seq : 't seq) =
     let mutable lastState = state
     let mutable optState = Some lastState
-    let mutable enr = seq.GetEnumerator ()
+    use mutable enr = seq.GetEnumerator ()
     while optState.IsSome && enr.MoveNext () do
         lastState <- optState.Value
         optState <- folder lastState enr.Current
