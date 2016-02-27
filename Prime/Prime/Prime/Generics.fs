@@ -22,7 +22,7 @@ module Generics =
     let inline inc n = n + one ()
 
     /// Generic decrement.
-    let inline dec n = n - one ()
+    let inline dec n = n + -(one ())
 
     /// Generic (and sectioned) addition.
     let inline add x y = x + y
