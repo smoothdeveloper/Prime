@@ -13,26 +13,26 @@ module Operators =
 
     /// The tautology function.
     /// No matter what you pass it, it evaluates to true.
-    let inline tautology _ = true
+    let tautology _ = true
 
     /// The tautology function with two arguments.
     /// No matter what you pass it, it evaluates to true.
-    let inline tautology2 _ _ = true
+    let tautology2 _ _ = true
 
     /// The tautology function with three arguments.
     /// No matter what you pass it, it evaluates to true.
-    let inline tautology3 _ _ _ = true
+    let tautology3 _ _ _ = true
 
     /// The absurdity function.
     /// No matter what you pass it, it evaluates to false.
-    let inline absurdity _ = false
+    let absurdity _ = false
 
     /// The absurdity function with two arguments.
     /// No matter what you pass it, it evaluates to false.
-    let inline absurdity2 _ _ = false
+    let absurdity2 _ _ = false
 
     /// Convert any value to an obj.
-    let inline objectify x = x :> obj
+    let objectify x = x :> obj
 
     /// Curry up two values.
     let inline curry f x y = f (x, y)
@@ -132,11 +132,11 @@ module Operators =
         ignore (TypeDescriptor.AddAttributes (typeof<'t>, TypeConverterAttribute typeof<'c>))
 
     /// Short-hand for linq enumerable cast.
-    let enumerable<'a> enumeratable =
+    let inline enumerable<'a> enumeratable =
         System.Linq.Enumerable.Cast<'a> enumeratable
 
     /// Make a Guid.
-    let makeGuid () =
+    let inline makeGuid () =
         Guid.NewGuid ()
 
     /// Make a Guid from a couple of ints.
