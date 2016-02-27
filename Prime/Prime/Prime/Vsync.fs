@@ -18,8 +18,7 @@ type [<ReferenceEquality>] 'a Vsync =
 /// Async is missing a couple of functions, as we know...
 module Async =
 
-    /// The missing Async.Map function.
-    /// TODO: better documentation!
+    /// Creates an asynchronous operation that runs 'f' over computation of 'a'.
     let Map f a =
         async
             { let! b = a
@@ -184,8 +183,7 @@ module Vsync =
         then Sync ^ fun () -> Array.ofSeq ^ Seq.map (function Sync a -> a () | Async _ -> failwithumf ()) s
         else Async ^ Async.Parallel ^ Seq.map Extract s
 
-    /// The missing Async.Map function.
-    /// TODO: better documentation!
+    /// Creates a potentially asynchronous operation that runs 'f' over computation of 'a'.
     let [<DebuggerHidden; DebuggerStepThrough>] Map f v =
         match v with
         | Sync a -> Sync ^ fun () -> f ^ a ()
