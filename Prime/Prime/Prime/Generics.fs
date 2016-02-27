@@ -18,10 +18,10 @@ module Generics =
     /// The generic monoidal append operation.
     let inline append a b = a + b
 
-    /// Generic increment.
+    /// Generic (and sectioned) increment.
     let inline inc n = n + one ()
 
-    /// Generic decrement.
+    /// Generic (and sectioned) decrement.
     let inline dec n = n + -(one ())
 
     /// Generic (and sectioned) addition.
@@ -35,6 +35,3 @@ module Generics =
 
     /// Generic (and sectioned) division.
     let inline div x y = x / y
-
-    /// Sectioned list cons.
-    let inline cons head tail = head :: tail
