@@ -4,7 +4,7 @@
 namespace Prime
 
 [<AutoOpen>]
-module Sectioning =
+module Generics =
 
     /// The generic zero value.
     let inline zero () = LanguagePrimitives.GenericZero
@@ -24,17 +24,17 @@ module Sectioning =
     /// Generic decrement.
     let inline dec n = n - one ()
 
-    /// Sectioned list cons.
-    let inline cons head tail = head :: tail
-
-    /// Sectioned addition.
+    /// Generic (and sectioned) addition.
     let inline add x y = x + y
 
-    /// Sectioned subtraction.
+    /// Generic (and sectioned) subtraction.
     let inline sub x y = x - y
 
-    /// Sectioned multiplication.
+    /// Generic (and sectioned) multiplication.
     let inline mul x y = x * y
 
-    /// Sectioned division.
+    /// Generic (and sectioned) division.
     let inline div x y = x / y
+
+    /// Sectioned list cons.
+    let inline cons head tail = head :: tail
