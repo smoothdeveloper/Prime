@@ -49,16 +49,16 @@ let tryTake (n : int) (seq : _ seq) =
 
 /// Project the first sequence onto the second.
 let project projector (seq_ : 'a seq) (seq2 : 'b option seq) =
-    use e = seq_.GetEnumerator ()
-    use e2 = seq2.GetEnumerator ()
+    use enr = seq_.GetEnumerator ()
+    use enr2 = seq2.GetEnumerator ()
     seq {
-        while e.MoveNext () do
+        while enr.MoveNext () do
             let projection = 
-                if e2.MoveNext () then
-                    match projector e2.Current with
+                if enr2.MoveNext () then
+                    match projector enr2.Current with
                     | Some projection -> projection
-                    | None -> e.Current
-                else e.Current
+                    | None -> enr.Current
+                else enr.Current
             yield projection }
 
 /// Implement a fold while folder results in Some.
