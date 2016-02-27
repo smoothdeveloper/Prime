@@ -12,7 +12,10 @@ module Sectioning =
     /// The generic one value.
     let inline one () = LanguagePrimitives.GenericOne
 
-    /// The generic append function.
+    /// The generic monoidal empty value.
+    let inline empty () = LanguagePrimitives.GenericZero
+
+    /// The generic monoidal append operation.
     let inline append a b = a + b
 
     /// Generic increment.
