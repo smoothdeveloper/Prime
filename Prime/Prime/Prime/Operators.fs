@@ -64,9 +64,6 @@ module Operators =
     /// Compare two strings.
     let inline strCmp str str2 = String.Compare (str, str2, StringComparison.Ordinal)
 
-    /// Sectioned list cons.
-    let inline cons head tail = head :: tail
-
     /// Get the .NET type of a target.
     let inline getType target = target.GetType ()
 

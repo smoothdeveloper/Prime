@@ -8,7 +8,7 @@ open System.Collections.Generic
 open Prime
 
 /// The missing cons function.
-let cons = Sectioning.cons
+let cons head tail = head :: tail
 
 /// Cons with flipped arguments.
 let inline flipCons tail head = head :: tail
