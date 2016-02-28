@@ -19,11 +19,11 @@ module SymbolicOperators =
         converter.ConvertFrom symbol :?> 'a
 
     /// Uses a symbolic converter to convert a value to a string.
-    let symstring<'a> (value : 'a) =
+    let scstring<'a> (value : 'a) =
         let converter = SymbolicConverter ^ getType value
         converter.ConvertToString value
 
     /// Uses a symbolic converter to convert a string to a value.
-    let symvalue<'a> (str : string) =
+    let scvalue<'a> (str : string) =
         let converter = SymbolicConverter typeof<'a>
         converter.ConvertFromString str :?> 'a

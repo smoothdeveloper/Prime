@@ -47,7 +47,7 @@ type [<NoEquality; NoComparison>] Xtension =
                 let converter = SymbolicConverter defaultValueType
                 if converter.CanConvertFrom defaultFieldType
                 then converter.ConvertFrom defaultValue :?> 'r
-                else failwith ^ "Cannot convert '" + symstring defaultValue + "' to type '" + defaultFieldType.Name + "'."
+                else failwith ^ "Cannot convert '" + scstring defaultValue + "' to type '" + defaultFieldType.Name + "'."
         | None -> Unchecked.defaultof<'r>
 
     /// Try to get the default value for a given xtension member, returning None when defaulting is disallowed.
