@@ -5,7 +5,6 @@ namespace Prime
 open System
 open System.Collections.Generic
 open System.Diagnostics
-open FSharpx.Collections
 open Prime
 open Prime.Tests
 module Program =

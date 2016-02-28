@@ -4,7 +4,6 @@
 namespace Prime
 open System
 open System.Collections.Generic
-open FSharpx.Collections
 open Prime
 
 /// Describes whether an in-flight event has been resolved or should cascade to down-stream handlers.

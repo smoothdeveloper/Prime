@@ -4,7 +4,6 @@
 namespace Prime
 open System
 open System.Diagnostics
-open FSharpx
 open Prime
 
 /// The Chain monad. Allows the user to define a chain of operations over the world that
