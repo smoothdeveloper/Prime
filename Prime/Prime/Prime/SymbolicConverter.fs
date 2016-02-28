@@ -31,8 +31,8 @@ type SymbolicConverter (targetType : Type) =
 
     let objToKeyValuePair (source : obj) =
         let kvpType = source.GetType ()
-        let key = (kvpType.GetProperty "Key").GetValue source
-        let value = (kvpType.GetProperty "Value").GetValue source
+        let key = (kvpType.GetProperty "Key").GetValue (source, null)
+        let value = (kvpType.GetProperty "Value").GetValue (source, null)
         KeyValuePair (key, value)
 
     let objToComparableSet (source : obj) =

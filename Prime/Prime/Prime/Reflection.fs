@@ -77,8 +77,10 @@ module TypeExtension =
                         match attribute with
                         | :? TypeConverterAttribute as tca -> yield tca
                         | _ -> () }
-            let localConverterAttributes = this.GetCustomAttributes<TypeConverterAttribute> ()
-            let typeConverterAttributes = Seq.append globalConverterAttributes localConverterAttributes
+            let typeConverterAttributes =
+                this.GetCustomAttributes (typeof<TypeConverterAttribute>, true) |>
+                Seq.map (fun attr -> attr :?> TypeConverterAttribute) |>
+                Seq.append globalConverterAttributes
             if not ^ Seq.isEmpty typeConverterAttributes then
                 let typeConverterAttribute = Seq.head typeConverterAttributes
                 let typeConverterTypeName = typeConverterAttribute.ConverterTypeName

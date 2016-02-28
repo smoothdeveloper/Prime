@@ -37,7 +37,10 @@ type [<NoEquality; NoComparison>] Xtension =
     /// Get the default value of an instance of type 'r taking into account XDefaultValue decorations.
     static member private getDefaultValue () : 'r =
         let defaultFieldType = typeof<'r>
-        let optDefaultValueAttribute = Seq.tryHead ^ defaultFieldType.GetCustomAttributes<XDefaultValueAttribute> ()
+        let optDefaultValueAttribute =
+            defaultFieldType.GetCustomAttributes (typeof<XDefaultValueAttribute>, true) |>
+            Seq.map (fun attr -> attr :?> XDefaultValueAttribute) |>
+            Seq.tryHead
         match optDefaultValueAttribute with
         | Some defaultValueAttribute ->
             match defaultValueAttribute.DefaultValue with
