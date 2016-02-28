@@ -96,7 +96,7 @@ module EventTests =
         let (unsubscribe, world) = observe TestEvent TestParticipant |> subscribePlus incTestStateAndCascade <| world
         let world = unsubscribe world
         let world = Eventable.publish 0 TestEvent ["Test"] TestParticipant world
-        Assert.True ^ Vmap.isEmpty ^ Eventable.getSubscriptions world
+        Assert.True (Vmap.isEmpty (Eventable.getSubscriptions world))
         Assert.Equal (0, world.TestState)
 
     let [<Fact>] filterWorks () =
@@ -140,7 +140,7 @@ module EventTests =
             world
         let world = Eventable.publish 0 TestEvent ["Test"] TestParticipant world
         let world = unsubscribe world
-        Assert.True ^ Vmap.isEmpty ^ Eventable.getSubscriptions world
+        Assert.True (Vmap.isEmpty (Eventable.getSubscriptions world))
 
     let [<Fact>] chainWorks () =
         
@@ -175,4 +175,4 @@ module EventTests =
         Assert.Equal (7, world.TestState)
         
         // assert no garbage is left over after chained computation is concluded
-        Assert.True ^ Vmap.isEmpty ^ Eventable.getSubscriptions world
+        Assert.True (Vmap.isEmpty (Eventable.getSubscriptions world))
